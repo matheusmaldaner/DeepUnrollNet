@@ -44,9 +44,6 @@ class Generic_train_test():
 			print('#training images ', len(self.dataloader)*self.opts.batch_sz)
 
 		for epoch in range(self.opts.start_epoch, self.opts.max_epochs):
-			if epoch > self.opts.lr_start_epoch_decay - self.opts.lr_step:
-				self.model.update_lr()
-
 			if epoch % self.opts.save_freq==0:
 				self.model.save_checkpoint(str(epoch))
 
@@ -62,6 +59,9 @@ class Generic_train_test():
 			# validation if dataloader provided
 			if self.dataloader_val is not None:
 				self.validation(epoch)
+
+			if epoch > self.opts.lr_start_epoch_decay - self.opts.lr_step:
+				self.model.update_lr()
 
 	def train_single_instance(self):
 		total_steps = 0
