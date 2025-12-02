@@ -49,20 +49,27 @@ class Dataset_carla_rs(Dataset):
                 seq_mask=[]
 
                 for i in range(10):
-                    if not os.path.isfile(os.path.join(seq_path, str(i).zfill(4)+'_rs'+img_ext)):
+                    # Generate all required file paths
+                    path_rs = os.path.join(seq_path, str(i).zfill(4)+'_rs'+img_ext)
+                    if load_middle_gs:
+                        path_gs = os.path.join(seq_path, str(i).zfill(4)+'_gs_m'+img_ext)
+                    else:
+                        path_gs = os.path.join(seq_path, str(i).zfill(4)+'_gs_f'+img_ext)
+                    path_depth = os.path.join(seq_path, str(i).zfill(4)+'_rs.pdepth')
+                    path_flow = os.path.join(seq_path, str(i).zfill(4)+'.flow')
+                    path_mask = os.path.join(seq_path, str(i).zfill(4)+'_mask'+img_ext)
+                    
+                    # Check if all required files exist
+                    if not os.path.isfile(path_rs):
+                        continue
+                    if not os.path.isfile(path_gs):
                         continue
 
-                    seq_Irs.append(os.path.join(seq_path, str(i).zfill(4)+'_rs'+img_ext))
-                    if load_middle_gs:
-                        seq_Igs.append(os.path.join(seq_path, str(i).zfill(4)+'_gs_m'+img_ext))
-                    else:
-                        seq_Igs.append(os.path.join(seq_path, str(i).zfill(4)+'_gs_f'+img_ext))
-                    seq_Drs.append(os.path.join(seq_path, str(i).zfill(4)+'_rs.pdepth'))
-                    seq_flow.append(os.path.join(seq_path, str(i).zfill(4)+'.flow'))
-                    seq_mask.append(os.path.join(seq_path, str(i).zfill(4)+'_mask'+img_ext))
-
-                    if not os.path.exists(seq_Irs[-1]):
-                        break
+                    seq_Irs.append(path_rs)
+                    seq_Igs.append(path_gs)
+                    seq_Drs.append(path_depth)
+                    seq_flow.append(path_flow)
+                    seq_mask.append(path_mask)
 
                     if len(seq_Irs)<seq_len:
                         continue
