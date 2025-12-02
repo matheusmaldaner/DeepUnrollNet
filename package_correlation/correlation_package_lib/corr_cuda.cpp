@@ -41,14 +41,14 @@ void corr_cuda::forward(at::Tensor input1,
     int nOutputPlane = neighborhood_grid_width_ * neighborhood_grid_width_;
 
     // Inputs
-    float * input1_data = input1.data<float>();
-    float * input2_data = input2.data<float>();
+    float * input1_data = input1.data_ptr<float>();
+    float * input2_data = input2.data_ptr<float>();
 
     // Outputs
-    float * output_data = output.data<float>();
+    float * output_data = output.data_ptr<float>();
 
-    float * rbot1_data = rbot1.data<float>();
-    float * rbot2_data = rbot2.data<float>();
+    float * rbot1_data = rbot1.data_ptr<float>();
+    float * rbot2_data = rbot2.data_ptr<float>();
 
     int pwidthheight = paddedbottomwidth * paddedbottomheight;
 
@@ -78,12 +78,12 @@ void corr_cuda::backward(at::Tensor input1,
                         int nInputCols)
 {
 
-    float * input1_data = input1.data<float>();
-    float * input2_data = input2.data<float>();
+    float * input1_data = input1.data_ptr<float>();
+    float * input2_data = input2.data_ptr<float>();
 
-    float * gradOutput_data = gradOutput.data<float>();
-    float * gradInput1_data = gradInput1.data<float>();
-    float * gradInput2_data = gradInput2.data<float>();
+    float * gradOutput_data = gradOutput.data_ptr<float>();
+    float * gradInput1_data = gradInput1.data_ptr<float>();
+    float * gradInput2_data = gradInput2.data_ptr<float>();
 
     int inputWidthHeight = nInputRows * nInputCols;
 
@@ -104,8 +104,8 @@ void corr_cuda::backward(at::Tensor input1,
     // Number of output channels amounts to displacement combinations in X and Y direction
     int nOutputPlane = neighborhood_grid_width_ * neighborhood_grid_width_;
 
-    float * rbot1_data = rbot1.data<float>();
-    float * rbot2_data = rbot2.data<float>();
+    float * rbot1_data = rbot1.data_ptr<float>();
+    float * rbot2_data = rbot2.data_ptr<float>();
 
     int pwidthheight = paddedbottomwidth * paddedbottomheight;
 
