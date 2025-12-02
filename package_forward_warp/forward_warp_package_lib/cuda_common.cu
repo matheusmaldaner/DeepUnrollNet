@@ -2,14 +2,15 @@
 #include <cuda_runtime_api.h>
 #include <stdio.h>
 
-texture<unsigned char, cudaTextureType2D, cudaReadModeElementType> texRef_u1;
-texture<float,  cudaTextureType2D, cudaReadModeElementType> texRef_f1;
-texture<int2,    cudaTextureType2D, cudaReadModeElementType>texRef_i2;
-texture<int4,    cudaTextureType2D, cudaReadModeElementType>texRef_i4;
-texture<uchar2, cudaTextureType2D, cudaReadModeElementType> texRef_u2;
-texture<float2, cudaTextureType2D, cudaReadModeElementType> texRef_f2;
-texture<float4, cudaTextureType2D, cudaReadModeElementType> texRef_f4;
-texture<uchar4, cudaTextureType2D, cudaReadModeElementType> texRef_u4;
+// Modern texture objects (replacing deprecated texture references)
+cudaTextureObject_t texObj_u1 = 0;
+cudaTextureObject_t texObj_f1 = 0;
+cudaTextureObject_t texObj_i2 = 0;
+cudaTextureObject_t texObj_i4 = 0;
+cudaTextureObject_t texObj_u2 = 0;
+cudaTextureObject_t texObj_f2 = 0;
+cudaTextureObject_t texObj_f4 = 0;
+cudaTextureObject_t texObj_u4 = 0;
 
 inline int getNumTiles(int totalSize, int tileSize)
 {
@@ -18,7 +19,11 @@ inline int getNumTiles(int totalSize, int tileSize)
 }
 
 template<class T>
-__global__ void kernel_texture_to_memory(T* output, tex_type type, int nOutputChans, int H, int W) {
+__global__ void kernel_texture_to_memory(T* output, tex_type type, int nOutputChans, int H, int W, 
+                                        cudaTextureObject_t texObj_u1, cudaTextureObject_t texObj_u2, 
+                                        cudaTextureObject_t texObj_u4, cudaTextureObject_t texObj_i2, 
+                                        cudaTextureObject_t texObj_i4, cudaTextureObject_t texObj_f1, 
+                                        cudaTextureObject_t texObj_f2, cudaTextureObject_t texObj_f4) {
     const int X = blockIdx.x * blockDim.x + threadIdx.x;
     const int Y = blockIdx.y * blockDim.y + threadIdx.y;
     if (!(X < W && Y < H)) return;
@@ -27,11 +32,11 @@ __global__ void kernel_texture_to_memory(T* output, tex_type type, int nOutputCh
 
     switch (type) {
         case TEX_U1: {
-            output[index] = tex2D(texRef_u1, X, Y);
+            output[index] = tex2D<unsigned char>(texObj_u1, X, Y);
             break;
         }
         case TEX_U2: {
-            uchar2 data = tex2D(texRef_u2, X, Y);
+            uchar2 data = tex2D<uchar2>(texObj_u2, X, Y);
             const unsigned char data_array[2] = {data.x, data.y};
             for (int i = 0; i < nOutputChans; i++) {
                 output[index + i] = data_array[i];
@@ -39,7 +44,7 @@ __global__ void kernel_texture_to_memory(T* output, tex_type type, int nOutputCh
             break;
         }
         case TEX_U4: {
-            uchar4 data = tex2D(texRef_u4, X, Y);
+            uchar4 data = tex2D<uchar4>(texObj_u4, X, Y);
             const unsigned char data_array[4] = {data.x, data.y, data.z, data.w};
             for (int i = 0; i < nOutputChans; i++) {
                 output[index + i] = data_array[i];
@@ -47,7 +52,7 @@ __global__ void kernel_texture_to_memory(T* output, tex_type type, int nOutputCh
             break;
         }
         case TEX_I2: {
-            int2 data = tex2D(texRef_i2, X, Y);
+            int2 data = tex2D<int2>(texObj_i2, X, Y);
             const int data_array[2] = {data.x, data.y};
             for (int i = 0; i < nOutputChans; i++) {
                 output[index + i] = data_array[i];
@@ -55,7 +60,7 @@ __global__ void kernel_texture_to_memory(T* output, tex_type type, int nOutputCh
             break;
         }
         case TEX_I4: {
-            int4 data = tex2D(texRef_i4, X, Y);
+            int4 data = tex2D<int4>(texObj_i4, X, Y);
             const int data_array[4] = {data.x, data.y, data.z, data.w};
             for (int i = 0; i < nOutputChans; i++) {
                 output[index + i] = data_array[i];
@@ -63,12 +68,12 @@ __global__ void kernel_texture_to_memory(T* output, tex_type type, int nOutputCh
             break;
         }
         case TEX_F1: {
-            float data = tex2D(texRef_f1, X, Y);
+            float data = tex2D<float>(texObj_f1, X, Y);
             output[index] = data;
             break;
         }
         case TEX_F2: {
-            float2 data = tex2D(texRef_f2, X, Y);
+            float2 data = tex2D<float2>(texObj_f2, X, Y);
             float data_array[2] = {data.x, data.y};
             for (int i = 0; i < nOutputChans; i++) {
                 output[index + i] = data_array[i];
@@ -76,7 +81,7 @@ __global__ void kernel_texture_to_memory(T* output, tex_type type, int nOutputCh
             break;
         }
         case TEX_F4: {
-            float4 data = tex2D(texRef_f4, X, Y);
+            float4 data = tex2D<float4>(texObj_f4, X, Y);
             float data_array[4] = {data.x, data.y, data.z, data.w};
             for (int i = 0; i < nOutputChans; i++) {
                 output[index + i] = data_array[i];
@@ -115,64 +120,36 @@ __global__ void to_pytorch_mem_layout_kernel(int B, int C, int H, int W, const T
 template<class T>
 void cudaTextureToCudaMem(const cudaArray* input, T* output, tex_type type, int nOutputChans, int H, int W)
 {
-    switch(type) {
-        case TEX_U1:
-            cudaBindTextureToArray(texRef_u1, input);
-            break;
-        case TEX_U2:
-            cudaBindTextureToArray(texRef_u2, input);
-            break;
-        case TEX_U4:
-            cudaBindTextureToArray(texRef_u4, input);
-            break;
-        case TEX_I2:
-            cudaBindTextureToArray(texRef_i2, input);
-            break;
-        case TEX_I4:
-            cudaBindTextureToArray(texRef_i4, input);
-            break;
-        case TEX_F1:
-            cudaBindTextureToArray(texRef_f1, input);
-            break;
-        case TEX_F2:
-            cudaBindTextureToArray(texRef_f2, input);
-            break;
-        case TEX_F4:
-            cudaBindTextureToArray(texRef_f4, input);
-            break;
-    }
+    // Create texture object
+    cudaResourceDesc resDesc;
+    memset(&resDesc, 0, sizeof(resDesc));
+    resDesc.resType = cudaResourceTypeArray;
+    resDesc.res.array.array = const_cast<cudaArray*>(input);
 
+    cudaTextureDesc texDesc;
+    memset(&texDesc, 0, sizeof(texDesc));
+    texDesc.addressMode[0] = cudaAddressModeClamp;
+    texDesc.addressMode[1] = cudaAddressModeClamp;
+    texDesc.filterMode = cudaFilterModePoint;
+    texDesc.readMode = cudaReadModeElementType;
+    texDesc.normalizedCoords = 0;
+
+    cudaTextureObject_t texObj = 0;
+    cudaCreateTextureObject(&texObj, &resDesc, &texDesc, NULL);
+
+    // Create all texture objects for kernel parameters
+    cudaTextureObject_t texObjs[8] = {0};
+    texObjs[0] = texObj; // for the current type
+    
     dim3 gridDim = dim3(getNumTiles(W, 32), getNumTiles(H, 32));
     dim3 blockDim = dim3(32, 32);
-    kernel_texture_to_memory<T><<<gridDim, blockDim>>>(output, type, nOutputChans, H, W);
+    kernel_texture_to_memory<T><<<gridDim, blockDim>>>(output, type, nOutputChans, H, W, 
+                                                        texObjs[0], texObjs[1], texObjs[2], texObjs[3],
+                                                        texObjs[4], texObjs[5], texObjs[6], texObjs[7]);
     cudaDeviceSynchronize();
 
-    switch(type) {
-        case TEX_U1:
-            cudaUnbindTexture(texRef_u1);
-            break;
-        case TEX_U2:
-            cudaUnbindTexture(texRef_u2);
-            break;
-        case TEX_U4:
-            cudaUnbindTexture(texRef_u4);
-            break;
-        case TEX_I2:
-            cudaUnbindTexture(texRef_i2);
-            break;
-        case TEX_I4:
-            cudaUnbindTexture(texRef_i4);
-            break;
-        case TEX_F1:
-            cudaUnbindTexture(texRef_f1);
-            break;
-        case TEX_F2:
-            cudaUnbindTexture(texRef_f2);
-            break;
-        case TEX_F4:
-            cudaUnbindTexture(texRef_f4);
-            break;
-    }
+    // Cleanup
+    cudaDestroyTextureObject(texObj);
 }
 
 
