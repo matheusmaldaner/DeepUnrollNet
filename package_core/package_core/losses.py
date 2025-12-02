@@ -62,7 +62,7 @@ class EdgeAwareVariationLoss(nn.Module):
 class PerceptualLoss():
     def contentFunc(self):
         conv_3_3_layer = 14
-        cnn = models.vgg19(pretrained=True).features
+        cnn = models.vgg19(weights=models.VGG19_Weights.DEFAULT).features
         cnn = cnn.cuda()
         model = nn.Sequential()
         model = model.cuda()
