@@ -5,14 +5,15 @@ import random
 import argparse
 import numpy as np
 
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 from package_core.generic_train_test import *
 from package_core.metrics import *
 from dataloader import *
 from model_unroll import *
 
-torch.cuda.set_device(1)
+if torch.cuda.is_available():
+    torch.cuda.set_device(0)  # Use GPU 0 instead of hardcoded GPU 1
 torch.manual_seed(0)
 
 ##===================================================##
