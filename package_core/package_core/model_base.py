@@ -17,7 +17,7 @@ class ModelBase():
     def load_network(self, network, network_label, epoch_label, save_dir):
         save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
         save_path = os.path.join(save_dir, save_filename)
-        network.load_state_dict(torch.load(save_path))
+        network.load_state_dict(torch.load(save_path, weights_only=False))
         print('load network from ', save_path)
 
     def print_networks(self, net):
