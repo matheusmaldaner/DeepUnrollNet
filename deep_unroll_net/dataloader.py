@@ -16,7 +16,8 @@ def Create_dataloader(opts):
                                     load_middle_gs=opts.pred_mid_gs,
                                     load_flow=opts.load_gt_flow,
                                     load_mask=load_mask,
-                                    load_depth=False)
+                                    load_depth=False,
+                                    img_ext='.png')
 
     dataloader = torch.utils.data.DataLoader(dataset, 
                                             batch_size=opts.batch_sz, 
