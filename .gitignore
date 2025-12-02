@@ -1,0 +1,23 @@
+# compiled packages
+package_correlation/build/*
+package_correlation/correlation_package.egg-info/*
+
+package_forward_warp/build/*
+package_forward_warp/forward_warp_package.egg-info/*
+
+package_core/build/*
+package_core/package_core.egg-info/*
+
+# virtual environments
+.venv/
+__pycache__/
+
+# datasets
+carla_rs_test.zip
+carla_rs_train.zip
+fastec_rs_test.zip
+fastec_rs_train.zip
+datasets/*
+
+# experiments
+experiments/*
