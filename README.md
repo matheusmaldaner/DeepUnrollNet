@@ -21,12 +21,30 @@ If you find our code, datasets or paper useful, please consider citing:
 }
 ```
 
+The code has been updated to work with PyTorch 2.9.1 with CUDA 12.8 and Python 3.10+.
+
 ## Dependencies installation
 To train or test the model, you need to install the dependent packages via
 ```
-pip install -r requirements.txt
+uv venv # create virtual environment
+source .venv/bin/activate
+uv pip install torch torchvision # defaults to 12.8 
+uv pip install -r requirements.txt
+uv pip install ninja # speeds up CUDA compilation
 ```
-The code is tested with PyTorch 1.1.0 with CUDA 9.0.
+
+If you are using a different version of cuda, you can find the respective Torch version [here](https://pytorch.org/get-started/locally/).
+
+### Running with High Performance Computing 
+You can install this on HPC (e.g. HiPerGator cluster at the University of Florida) via
+```
+module load cuda/12.8
+uv venv # create virtual environment
+source .venv/bin/activate
+uv pip install torch torchvision # defaults to 12.8 
+uv pip install -r requirements.txt
+uv pip install ninja # speeds up CUDA compilation
+```
 
 #### Install correlation package
 ```
