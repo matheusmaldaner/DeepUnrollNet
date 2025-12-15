@@ -11,7 +11,7 @@ We present a novel network architecture for rolling shutter effect rectification
 You can find detailed usage instructions for training your own models
 and using pretrained models below.
 
-If you find our code, datatsets or paper useful, please consider citing:
+If you find our code, datasets or paper useful, please consider citing:
 ```
 @InProceedings{Liu2020CVPR,
   author = {Peidong Liu and Zhaopeng Cui and Viktor Larsson and Marc Pollefeys},

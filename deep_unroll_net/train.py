@@ -14,6 +14,10 @@ from model_unroll import *
 
 if torch.cuda.is_available():
     torch.cuda.set_device(0)  # Use GPU 0 instead of hardcoded GPU 1
+    print(f"Using GPU: {torch.cuda.get_device_name(0)}")
+    print(f"GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
+else:
+    print("WARNING: CUDA not available, using CPU")
 torch.manual_seed(0)
 
 ##===================================================##
