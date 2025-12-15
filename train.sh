@@ -3,14 +3,14 @@
 # !! Updata the path to the dataset and directory to 
 # !! save your trained models with your own local path !!
 carla_dataset_type=Carla
-carla_root_path_training_data=path_to_carla_rs/train
+carla_root_path_training_data=../datasets/carla_train
 
 fastec_dataset_type=Fastec
-fastec_root_path_training_data=path_to_fastec_rs/train/
+fastec_root_path_training_data=../datasets/fastec_train
 
-log_dir=path_to_log_dir/
+log_dir=../experiments/training_models/
 
-#
+
 cd deep_unroll_net
 
 python train.py \
